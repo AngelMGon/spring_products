@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rest-products
+spec:
+  selector:
+    matchLabels:
+      app: rest-products
+  replicas: 1 # deployment runs 3 pods matching the template
+  template: # create pods using pod definition in this template
+    metadata:
+      labels:
+        app: rest-products
+    spec:
+      containers:
+      - name: rest-products
+        image: fra.ocir.io/fre4v6wtcvwd/demo/spring-products:latest
+        imagePullPolicy: Always
+        ports:
+        - name: rest-products
+          containerPort: 8090 #Endpoint is at port 8080 in the container
+          protocol: TCP
+      imagePullSecrets:
+      - name: ocirsecret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rest-products-lb
+  labels:
+    app: rest-products
+spec:
+  type: LoadBalancer #Exposes the service as a node port
+  ports:
+  - port: 8090
+  selector:
+    app: rest-products
